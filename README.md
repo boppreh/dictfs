@@ -19,6 +19,9 @@ Wraps the file system in a dictionary-like access structure.
     curdir.files()
     # ['.gitignore', 'LICENSE', 'README.md', 'dictfs.py']
 
+    curdir['.git']
+    # DictFs'/home/boppreh/git/dictfs/.git'
+
     curdir[0]
     # DictFs'/home/boppreh/git/dictfs/.git'
 
@@ -43,3 +46,6 @@ Wraps the file system in a dictionary-like access structure.
 
     curdir / '.git'
     # '/home/boppreh/git/dictfs/.git'
+    
+    curdir['~/']
+    # DictFs'/home/boppreh'
