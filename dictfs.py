@@ -1,9 +1,8 @@
 from os import path, listdir
 
 class DictFs(object):
-	def __init__(self, start_dir, type=''):
+	def __init__(self, start_dir):
 		self.dir = path.abspath(start_dir)
-		self.type = type
 
 	def subpath(self, index):
 		if isinstance(index, str):
@@ -25,8 +24,18 @@ class DictFs(object):
 		if path.isdir(new_path):
 			return DictFs(new_path)
 		elif path.isfile(new_path):
-			with open(new_path, 'r' + self.type) as f:
+			with open(new_path, 'r') as f:
 				return f.read()
+
+	def __setitem__(self, index, value):
+		new_path = self.subpath(index)
+		if isinstance(value, bytes):
+			bytes_value = value
+		else:
+			bytes_value = str(value).encode('utf-8')
+
+		with open(new_path, 'wb') as f:
+			f.write(bytes_value)
 
 	def __iter__(self):
 		return iter(self.keys())
@@ -37,5 +46,4 @@ class DictFs(object):
 curdir = DictFs('.')
 
 if __name__ == '__main__':
-	for i in curdir:
-		print(i)
+	print(curdir['test.txt'])
