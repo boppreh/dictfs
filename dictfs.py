@@ -146,6 +146,13 @@ class DictFs(object):
         """
         return iter(self.keys())
 
+    def __contains__(self, index):
+        """
+        Returns True if index is the name of an element in this directory,
+        or if it's a valid integer index.
+        """
+        return path.exists(self._subpath(index))
+
     def __repr__(self):
         return 'DictFs' + repr(self.path)
 
@@ -171,6 +178,9 @@ if __name__ == '__main__':
 
     curdir['.git']
     # DictFs'/home/boppreh/git/dictfs/.git'
+
+    'LICENSE' in curdir
+    # True
 
     curdir[0]
     # DictFs'/home/boppreh/git/dictfs/.git'
