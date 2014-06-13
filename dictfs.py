@@ -10,7 +10,10 @@ class DictFs(object):
         if not path.isdir(self.path):
             raise IOError('start_dir must be a directory, got {}'.format(self.path))
 
-    def subpath(self, index):
+    def _subpath(self, index):
+        """
+        Returns a subpath from a string or integer index.
+        """
         if isinstance(index, str):
             return path.join(self.path, path.expanduser(index))
         elif isinstance(index, int):
@@ -19,28 +22,57 @@ class DictFs(object):
             raise KeyError('Invalid index {} ({}).'.format(type(index), index))
 
     def keys(self, show_hidden=True):
+        """
+        Returns the name of all elements in this directory.
+        If show_hidden is False, names starting with a dot are ommited.
+        """
         keys = listdir(self.path)
         if not show_hidden:
             keys = [path for path in keys if not path.startswith('.')]
         return sorted(keys)
 
     def items(self, show_hidden=True):
+        """
+        Returns pairs (key, value) for all elements in this directory.
+        The value of file elements are their content, so this reads all
+        files in the current directory.
+        """
         for key in self.keys(show_hidden):
             yield key, self[key]
 
     def files(self, show_hidden=True):
+        """
+        Returns the name of all files in this directory.
+        """
         return filter(path.isfile, self.keys(show_hidden))
 
     def dirs(self, show_hidden=True):
+        """
+        Returns the name of all directories inside this directory.
+        """
         return filter(path.isdir, self.keys(show_hidden))
 
     def index(self, key):
+        """
+        Return the numeric index of the given element name.
+        """
         return self.keys().index(key)
 
     def __len__(self):
+        """
+        Return the number of elements in this directory.
+        """
         return len(self.keys())
 
     def __getitem__(self, index):
+        """
+        Returns all elements matching the given index.
+        Index may be an element name, an integer, a list of
+        element names or integers, or a slice object.
+
+        Files are returned as their content and directories as
+        further instances of DictFs.
+        """
         if hasattr(index, '__iter__'):
             return [self[i] for i in index]
         elif isinstance(index, slice):
@@ -57,7 +89,7 @@ class DictFs(object):
             step = index.step or 1
             return [self[i] for i in range(start, stop, step)]
 
-        new_path = self.subpath(index)
+        new_path = self._subpath(index)
 
         if path.isdir(new_path):
             return DictFs(new_path)
@@ -68,7 +100,11 @@ class DictFs(object):
             raise KeyError('Path not found: {}'.format(new_path))
 
     def __setitem__(self, index, value):
-        new_path = self.subpath(index)
+        """
+        Writes the value to a file given by index.
+        If the file doesn't exist it is created.
+        """
+        new_path = self._subpath(index)
         if isinstance(value, bytes):
             bytes_value = value
         else:
@@ -78,7 +114,10 @@ class DictFs(object):
             f.write(bytes_value)
 
     def __delitem__(self, index):
-        new_path = self.subpath(index)
+        """
+        Deletes a file or directory.
+        """
+        new_path = self._subpath(index)
         if path.isfile(new_path):
             remove(new_path)
         elif path.isdir(new_path):
@@ -87,14 +126,24 @@ class DictFs(object):
             raise KeyError('Path not found: {}'.format(new_path))
 
     def __add__(self, other):
+        """
+        Performs a simple concatenation of the current path and the given
+        value.
+        """
         return self.path + other
 
     def __truediv__(self, other):
+        """
+        Returns the subpath of the given element, which may not exist.
+        """
         return self.path + path.sep + other
 
     __div__ = __truediv__
 
     def __iter__(self):
+        """
+        Iterates through all elements in this directory.
+        """
         return iter(self.keys())
 
     def __repr__(self):
