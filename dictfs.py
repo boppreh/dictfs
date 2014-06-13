@@ -3,18 +3,18 @@ from shutil import rmtree
 
 class DictFs(object):
 	def __init__(self, start_dir):
-		self.dir = path.abspath(path.expanduser(start_dir))
+		self.path = path.abspath(path.expanduser(start_dir))
 
 	def subpath(self, index):
 		if isinstance(index, str):
-			return path.join(self.dir, index)
+			return path.join(self.path, index)
 		elif isinstance(index, int):
 			return self.keys()[index]
 		else:
 			raise KeyError('Invalid index {} ({}).'.format(type(index), index))
 
 	def keys(self, show_hidden=True):
-		keys = listdir(self.dir)
+		keys = listdir(self.path)
 		if not show_hidden:
 			keys = [path for path in keys if not path.startswith('.')]
 		return sorted(keys)
@@ -82,19 +82,23 @@ class DictFs(object):
 			raise KeyError('Path not found: {}'.format(new_path))
 
 	def __add__(self, other):
-		return self.dir + path.sep + other
+		return self.path + other
+
+	def __truediv__(self, other):
+		return self.path + path.sep + other
+
+	__div__ = __truediv__
 
 	def __iter__(self):
 		return iter(self.keys())
 
 	def __repr__(self):
-		return 'DictFs' + repr(self.dir)
+		return 'DictFs' + repr(self.path)
 
 	def __str__(self):
-		return str(self.dir)
+		return str(self.path)
 
 curdir = DictFs('.')
 
 if __name__ == '__main__':
-	print(curdir.keys())
-	print(curdir[:-1])
+	print(curdir['LICENSE', '.git'])
