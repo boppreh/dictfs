@@ -10,7 +10,7 @@ class DictFs(object):
 		elif isinstance(index, int):
 			return self.keys()[index]
 		else:
-			raise KeyError('Invalid index type {} ({}).'.format(type(index), index))
+			raise KeyError('Invalid index {} ({}).'.format(type(index), index))
 
 	def keys(self, show_hidden=True):
 		keys = listdir(self.dir)
@@ -19,6 +19,9 @@ class DictFs(object):
 		return sorted(keys)
 
 	def __getitem__(self, index):
+		if hasattr(index, '__iter__'):
+			return [self[i] for i in index]
+
 		new_path = self.subpath(index)
 
 		if path.isdir(new_path):
@@ -26,6 +29,8 @@ class DictFs(object):
 		elif path.isfile(new_path):
 			with open(new_path, 'r') as f:
 				return f.read()
+		else:
+			raise KeyError('Path not found: {}'.format(new_path))
 
 	def __setitem__(self, index, value):
 		new_path = self.subpath(index)
@@ -41,9 +46,12 @@ class DictFs(object):
 		return iter(self.keys())
 
 	def __repr__(self):
-		return self.dir
+		return repr(self.dir)
+
+	def __str__(self):
+		return str(self.dir)
 
 curdir = DictFs('.')
 
 if __name__ == '__main__':
-	print(curdir['test.txt'])
+	print(curdir['.git', 'README.md'])
