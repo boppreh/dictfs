@@ -2,12 +2,17 @@ from os import path, listdir, remove
 from shutil import rmtree
 
 class DictFs(object):
-    def __init__(self, start_dir):
+    def __init__(self, start_dir='.'):
+        """
+        Creates a new DictFs object starting at the given directory.
+        """
         self.path = path.abspath(path.expanduser(start_dir))
+        if not path.isdir(self.path):
+            raise IOError('start_dir must be a directory, got {}'.format(self.path))
 
     def subpath(self, index):
         if isinstance(index, str):
-            return path.join(self.path, index)
+            return path.join(self.path, path.expanduser(index))
         elif isinstance(index, int):
             return self.keys()[index]
         else:
@@ -115,6 +120,9 @@ if __name__ == '__main__':
     curdir.files()
     # ['.gitignore', 'LICENSE', 'README.md', 'dictfs.py']
 
+    curdir['.git']
+    # DictFs'/home/boppreh/git/dictfs/.git'
+
     curdir[0]
     # DictFs'/home/boppreh/git/dictfs/.git'
 
@@ -139,3 +147,6 @@ if __name__ == '__main__':
 
     curdir / '.git'
     # '/home/boppreh/git/dictfs/.git'
+
+    curdir['~/']
+    # DictFs'/home/boppreh'
