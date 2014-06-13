@@ -159,6 +159,11 @@ class DictFs(object):
     def __str__(self):
         return str(self.path)
 
+    def __eq__(self, other):
+        if isinstance(other, DictFs):
+            return self.path == other.path
+        return self.path == path.abspath(other.path)
+
 curdir = DictFs('.')
 
 if __name__ == '__main__':
