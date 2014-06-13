@@ -76,18 +76,11 @@ class DictFs(object):
         if hasattr(index, '__iter__'):
             return [self[i] for i in index]
         elif isinstance(index, slice):
-            start = index.start or 0
-            stop = index.stop or len(self)
-            if isinstance(start, str):
-                start = self.index(start)
-            elif start < 0:
-                start += len(self)
-            if isinstance(stop, str):
-                stop = self.index(stop)
-            elif stop < 0:
-                stop += len(self)
-            step = index.step or 1
-            return [self[i] for i in range(start, stop, step)]
+            if isinstance(index.start, str):
+                index.start = self.index(start)
+            if isinstance(index.stop, str):
+                index.stop = self.index(stop)
+            return [self[i] for i in self.keys().__getitem__(index)]
 
         new_path = self._subpath(index)
 
